@@ -13,6 +13,8 @@ models:
     description: >
       Dimension Kund:innen - eine Zeile pro Nutzer:in, ergänzt um die Anzahl
       der Bestellungen je Status.
+    config:
+      tags: ['pii']
     columns:
       - <<: *id_column
         name: user_id
@@ -82,6 +84,7 @@ models:
     config:
       contract:
         enforced: true
+      access: public
     columns:
       - name: order_id
         description: "Primärschlüssel der Bestellung."

@@ -1,0 +1,12 @@
+selectors:
+  - name: nightly
+    description: Nächtlicher Lauf ohne manuelle Models
+    definition:
+      union:
+        - 'tag:nightly'
+        - 'path:models/marts'
+        - exclude:
+            - 'tag:manual'
+
+  - name: staging
+    definition: 'path:models/staging'

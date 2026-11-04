@@ -18,13 +18,31 @@ models:
     staging:
       +materialized: view
       +schema: staging
+      +tags: ['staging']
     intermediate:
       +materialized: ephemeral
+      +group: sales
+      +access: private
     marts:
       +materialized: table
       +schema: marts
+      +tags: ['nightly']
+      +group: sales
+      +grants:
+        select: ['reporting']
       +persist_docs:
         relation: true
         columns: true
       fct_events:
         +full_refresh: false     # Schutz vor versehentlichem Neuaufbau (auch mit --full-refresh)
+
+# Hooks (Übung 7): Audit-Log pro Lauf und Schema-Rechte
+on-run-start:
+  - "create schema if not exists {{ target.schema }}"
+  - "create table if not exists {{ target.schema }}.audit_log (
+      invocation_id text, target_name text, finished_at timestamp,
+      nodes int, errors int)"
+
+on-run-end:
+  - "{% for schema in schemas %}grant usage on schema {{ schema }} to reporting; {% endfor %}"
+  - "{{ log_run_end(results) }}"

@@ -1,0 +1,10 @@
+functions:
+  - name: margin_pct
+    description: Marge in Prozent des Verkaufspreises (NULL bei Verkaufspreis 0)
+    arguments:
+      - name: sale_price
+        data_type: double precision
+      - name: cost
+        data_type: double precision
+    returns:
+      data_type: double precision

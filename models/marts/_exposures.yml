@@ -1,0 +1,15 @@
+version: 2
+
+exposures:
+  - name: umsatz_dashboard
+    label: Umsatz-Dashboard
+    type: dashboard
+    maturity: medium
+    url: https://bi.example.com/dashboards/umsatz
+    description: Umsatz und Marge nach Land und Produktkategorie
+    depends_on:
+      - ref('fct_orders')
+      - ref('dim_users')
+    owner:
+      name: Team Analytics
+      email: analytics@example.com
