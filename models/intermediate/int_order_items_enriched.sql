@@ -26,9 +26,10 @@ enriched as (
         products.product_name,
         products.brand,
         products.category,
-        order_items.sale_price,
-        products.product_cost,
-        order_items.sale_price - products.product_cost as item_margin
+        {{ round_money('order_items.sale_price') }} as sale_price,
+        {{ round_money('products.product_cost') }} as product_cost,
+        {{ round_money('order_items.sale_price - products.product_cost') }} as item_margin,
+        {{ margin_pct('order_items.sale_price', 'products.product_cost') }} as item_margin_pct
     from order_items
     inner join orders on order_items.order_id = orders.order_id
     left join products on order_items.product_id = products.product_id

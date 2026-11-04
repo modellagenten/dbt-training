@@ -1,0 +1,45 @@
+version: 2
+
+macros:
+  - name: round_money
+    description: Rundet einen Geldbetrag oder Ausdruck auf n Nachkommastellen und liefert numeric.
+    arguments:
+      - name: column_name
+        type: column
+        description: Spalte oder Ausdruck, der gerundet wird.
+      - name: precision
+        type: integer
+        description: Nachkommastellen, Standard 2.
+
+  - name: margin_pct
+    description: Marge in Prozent des Umsatzes, gerundet; Division durch 0 liefert NULL.
+    arguments:
+      - name: revenue
+        type: column
+        description: Spalte oder Ausdruck für den Umsatz (Verkaufspreis).
+      - name: cost
+        type: column
+        description: Spalte oder Ausdruck für die Kosten.
+      - name: precision
+        type: integer
+        description: Nachkommastellen, Standard 1.
+
+  - name: order_status_group
+    description: Fasst den Bestellstatus zu den Gruppen abgeschlossen, in Bearbeitung und storniert zusammen.
+    arguments:
+      - name: column_name
+        type: column
+        description: Spalte mit dem Bestellstatus (Complete, Shipped, Processing, Cancelled, Returned).
+
+  - name: get_statuses
+    description: Liefert die vorhandenen Bestellstatus als Liste (nutzt run_query, Model stg_orders muss existieren).
+
+  - name: grant_select_on_schema
+    description: Vergibt Leserechte auf alle Tabellen eines Schemas an eine Rolle (für dbt run-operation).
+    arguments:
+      - name: schema_name
+        type: string
+        description: Schema, dessen Tabellen freigegeben werden.
+      - name: role
+        type: string
+        description: Datenbankrolle, die lesen darf.

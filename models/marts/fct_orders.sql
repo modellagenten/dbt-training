@@ -21,6 +21,7 @@ final as (
         orders.order_id,
         orders.user_id,
         orders.status,
+        {{ order_status_group('orders.status') }} as status_group,
         orders.created_at as ordered_at,
         coalesce(order_totals.line_count, 0) as line_count,
         coalesce(order_totals.revenue, 0) as revenue,

@@ -5,3 +5,38 @@ models:
     description: "Web-Events - bereinigte Sicht auf raw.events"
     config:
       event_time: created_at    # Voraussetzung für Microbatch: dbt filtert diese Quelle pro Batch
+
+  - name: stg_orders
+    description: "Bestellköpfe - bereinigte Sicht auf raw.orders (eine Zeile pro Bestellung)"
+    columns:
+      - name: order_id
+        data_type: integer
+        description: "Primärschlüssel der Bestellung"
+
+      - name: user_id
+        data_type: integer
+        description: "Kund:in, die bestellt hat"
+
+      - name: status
+        data_type: text
+        description: "Bestellstatus: Processing, Shipped, Complete, Cancelled oder Returned"
+
+      - name: created_at
+        data_type: timestamp with time zone
+        description: "Zeitpunkt der Bestellung"
+
+      - name: shipped_at
+        data_type: timestamp with time zone
+        description: "Zeitpunkt des Versands (NULL, solange nicht versendet)"
+
+      - name: delivered_at
+        data_type: timestamp with time zone
+        description: "Zeitpunkt der Lieferung (NULL, solange nicht geliefert)"
+
+      - name: returned_at
+        data_type: timestamp with time zone
+        description: "Zeitpunkt der Retoure (NULL, wenn nicht zurückgesendet)"
+
+      - name: item_count
+        data_type: integer
+        description: "Anzahl der Positionen (aus num_of_item)"
