@@ -19,3 +19,23 @@ models:
       - name: category_group
         data_tests:
           - not_null
+
+  - name: fct_order_items
+    description: "Fakt Bestellpositionen - eine Zeile pro Bestellposition"
+    columns:
+      - name: order_item_id
+        data_tests:
+          - unique
+          - not_null
+      - name: user_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_users')
+                field: user_id
+      - name: product_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_id
