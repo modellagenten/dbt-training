@@ -1,0 +1,14 @@
+version: 2
+
+seeds:
+  - name: category_groups
+    description: "Zuordnung der thelook-Kategorien zu Produktgruppen"
+    config:
+      column_types:
+        category: varchar(100)
+        category_group: varchar(100)
+    columns:
+      - name: category
+        data_tests:
+          - unique
+          - not_null

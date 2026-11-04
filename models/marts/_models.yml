@@ -8,3 +8,14 @@ models:
         data_tests:
           - unique
           - not_null
+
+  - name: dim_products
+    description: "Dimension Produkte - eine Zeile pro Produkt, inkl. Produktgruppe aus dem Seed"
+    columns:
+      - name: product_id
+        data_tests:
+          - unique
+          - not_null
+      - name: category_group
+        data_tests:
+          - not_null
