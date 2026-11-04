@@ -1,0 +1,7 @@
+version: 2
+
+models:
+  - name: stg_events
+    description: "Web-Events - bereinigte Sicht auf raw.events"
+    config:
+      event_time: created_at    # Voraussetzung für Microbatch: dbt filtert diese Quelle pro Batch

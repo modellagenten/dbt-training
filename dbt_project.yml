@@ -23,3 +23,5 @@ models:
     marts:
       +materialized: table
       +schema: marts
+      fct_events:
+        +full_refresh: false     # Schutz vor versehentlichem Neuaufbau (auch mit --full-refresh)

@@ -1,0 +1,16 @@
+snapshots:
+  - name: snap_orders
+    description: "Historie des Bestellstatus (SCD Typ 2) auf Basis von raw.orders"
+    relation: source('thelook', 'orders')
+    config:
+      schema: snapshots
+      unique_key: order_id
+      strategy: check
+      check_cols:
+        - status
+      hard_deletes: new_record
+    columns:
+      - name: dbt_scd_id
+        data_tests:
+          - unique
+          - not_null

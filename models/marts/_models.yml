@@ -61,3 +61,13 @@ models:
         data_tests:
           - unique
           - not_null
+
+  - name: fct_events
+    description: >
+      Fakt Web-Events - Microbatch-Model (Zeitfenster pro Monat, Lookback 1).
+      Incremental, weil Events nur angefügt werden und die Tabelle wächst.
+    columns:
+      - name: event_id
+        data_tests:
+          - unique
+          - not_null
