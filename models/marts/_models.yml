@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: dim_users
+    description: "Dimension Kund:innen - eine Zeile pro Nutzer:in"
+    columns:
+      - name: user_id
+        data_tests:
+          - unique
+          - not_null
