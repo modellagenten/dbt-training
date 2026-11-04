@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: thelook
+    description: "E-Commerce-Rohdaten (thelook_ecommerce), per CSV-Import im Schema raw"
+    schema: raw
+    tables:
+      - name: users
+        description: "Registrierte Kund:innen"
+      - name: products
+        description: "Produktkatalog"
+      - name: orders
+        description: "Bestellköpfe"
+      - name: order_items
+        description: "Bestellpositionen"
+      - name: inventory_items
+        description: "Lagerartikel (ein Eintrag pro physischem Artikel)"
+      - name: distribution_centers
+        description: "Lagerstandorte"
+      - name: events
+        description: "Web-Events (Stichprobe mit 10.000 Zeilen)"
