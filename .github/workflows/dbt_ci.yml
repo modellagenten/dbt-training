@@ -1,0 +1,60 @@
+# NUR ZUM LESEN: In der Schulung gibt es keinen Git-Server, der Workflow wird nicht ausgeführt.
+# Continuous Integration: Bei jedem Pull Request gegen main werden nur die geänderten Models
+# (und ihre Children) in ein eigenes CI-Schema gebaut - alles andere kommt per Defer aus prod.
+name: dbt CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:                       # nur bei Änderungen an dbt-Dateien starten (spart CI-Kosten)
+      - "models/**"
+      - "macros/**"
+      - "seeds/**"
+      - "snapshots/**"
+      - "functions/**"
+      - "tests/**"
+      - "dbt_project.yml"
+      - "packages.yml"
+      - "selectors.yml"
+
+concurrency:                     # neuer Push im selben PR bricht den laufenden Lauf ab
+  group: dbt-ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  dbt-slim-ci:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      CI_SCHEMA: dbt_ci_pr_${{ github.event.pull_request.number }}   # ein Schema pro Pull Request
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: dbt installieren (Version gepinnt)
+        run: python -m pip install "dbt-core~=1.12.0" dbt-postgres
+
+      - run: dbt deps
+
+      # Prod-Manifest bereitstellen -> ./prod-artifacts/manifest.json
+      # Beispiel: das Artefakt "prod-manifest" des letzten Produktionslaufs (siehe dbt_prod.yml)
+      # herunterladen, z. B. mit actions/download-artifact (run-id des Prod-Laufs) oder aus einem Bucket.
+      # - uses: actions/download-artifact@v8
+      #   with:
+      #     name: prod-manifest
+      #     path: prod-artifacts
+      #     run-id: ${{ vars.PROD_RUN_ID }}
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Slim CI - nur Geändertes bauen, Rest aus prod
+        run: dbt build --select "state:modified+" --defer --state prod-artifacts --target ci
+
+      - name: CI-Schemas aufräumen
+        if: always()             # auch bei Fehlern
+        run: |
+          dbt run-operation drop_ci_schemas --args "{prefix: ${CI_SCHEMA}}" --target ci

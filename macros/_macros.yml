@@ -43,3 +43,10 @@ macros:
       - name: role
         type: string
         description: Datenbankrolle, die lesen darf.
+
+  - name: drop_ci_schemas
+    description: Löscht alle CI-Schemas mit dem Präfix (für dbt run-operation nach Slim CI). Das Präfix muss mit dbt_ci beginnen.
+    arguments:
+      - name: prefix
+        type: string
+        description: Schema-Präfix, Standard dbt_ci.

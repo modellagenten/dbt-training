@@ -5,3 +5,6 @@ logs/
 .user.yml
 __pycache__/
 .DS_Store
+
+# Artefakte des Prod-Laufs (lokale Slim-CI-Übung)
+prod-artifacts/

@@ -31,6 +31,16 @@ dbt_ecommerce:
       schema: analytics
       threads: 4
 
+    prod_blue:  # Blue/Green: baut parallel zu prod in analytics_blue*
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'postgres') }}"
+      port: 5432
+      user: "{{ env_var('POSTGRES_USER') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD') }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'ecommerce') }}"
+      schema: analytics_blue
+      threads: 4
+
 # Beispiele für andere Datenbanken (auskommentiert) - siehe Block 09
 #    snowflake:
 #      type: snowflake
