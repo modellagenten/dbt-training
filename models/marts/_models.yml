@@ -39,3 +39,17 @@ models:
               arguments:
                 to: ref('dim_products')
                 field: product_id
+
+  - name: fct_orders
+    description: "Fakt Bestellungen - eine Zeile pro Bestellung, Kennzahlen aus den Positionen"
+    columns:
+      - name: order_id
+        data_tests:
+          - unique
+          - not_null
+      - name: user_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_users')
+                field: user_id
