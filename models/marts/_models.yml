@@ -53,3 +53,11 @@ models:
               arguments:
                 to: ref('dim_users')
                 field: user_id
+
+  - name: obt_order_items
+    description: "One Big Table - Bestellpositionen mit Nutzer- und Produktattributen (Serving Layer)"
+    columns:
+      - name: order_item_id
+        data_tests:
+          - unique
+          - not_null
