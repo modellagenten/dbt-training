@@ -25,7 +25,7 @@ final as (
         orders.created_at as ordered_at,
         coalesce(order_totals.line_count, 0) as line_count,
         coalesce(order_totals.revenue, 0) as revenue,
-        coalesce(order_totals.margin, 0) as margin
+        round(coalesce(order_totals.margin, 0), 2) as margin
     from orders
     left join order_totals on orders.order_id = order_totals.order_id
 )
