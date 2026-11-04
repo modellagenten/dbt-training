@@ -9,6 +9,9 @@ test-paths: ["tests"]
 snapshot-paths: ["snapshots"]
 analysis-paths: ["analyses"]
 
+flags:
+  require_generic_test_arguments_property: true   # Vorschlag von dbt-autofix; Tests nutzen `arguments:`
+
 clean-targets:
   - "target"
   - "dbt_packages"

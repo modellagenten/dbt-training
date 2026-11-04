@@ -1,3 +1,12 @@
+{{ config(
+    indexes=[
+        {'columns': ['order_id']},
+        {'columns': ['user_id', 'ordered_at']},
+        {'columns': ['product_id'], 'type': 'hash'}
+    ],
+    post_hook="analyze {{ this }}"
+) }}
+
 with order_items as (
 
     select * from {{ ref('int_order_items_enriched') }}

@@ -8,3 +8,4 @@ __pycache__/
 
 # Artefakte des Prod-Laufs (lokale Slim-CI-Übung)
 prod-artifacts/
+dbt_internal_packages/

@@ -6,8 +6,20 @@ models:
     config:
       event_time: created_at    # Voraussetzung für Microbatch: dbt filtert diese Quelle pro Batch
 
+  - name: stg_order_items
+    description: "Bestellpositionen - bereinigte Sicht auf raw.order_items"
+    config:
+      event_time: created_at    # Zeitspalte für --sample (Übung 9)
+
+  - name: stg_users
+    description: "Kund:innen - bereinigte Sicht auf raw.users"
+    config:
+      event_time: created_at    # Zeitspalte für --sample (Übung 9)
+
   - name: stg_orders
     description: "Bestellköpfe - bereinigte Sicht auf raw.orders (eine Zeile pro Bestellung)"
+    config:
+      event_time: created_at    # Zeitspalte für --sample (Übung 9)
     columns:
       - name: order_id
         data_type: integer
