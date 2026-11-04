@@ -1,29 +1,47 @@
 version: 2
 
+anchors:
+  - &id_column
+    description: "Eindeutiger Schlüssel"
+    data_type: integer
+    data_tests:
+      - not_null
+      - unique
+
 models:
   - name: dim_users
-    description: "Dimension Kund:innen - eine Zeile pro Nutzer:in"
+    description: >
+      Dimension Kund:innen - eine Zeile pro Nutzer:in, ergänzt um die Anzahl
+      der Bestellungen je Status.
     columns:
-      - name: user_id
-        data_tests:
-          - unique
-          - not_null
+      - <<: *id_column
+        name: user_id
+        description: "Primärschlüssel der Kund:in (id aus raw.users)."
+      - name: orders_complete
+        description: "Anzahl abgeschlossener Bestellungen."
 
   - name: dim_products
-    description: "Dimension Produkte - eine Zeile pro Produkt, inkl. Produktgruppe aus dem Seed"
+    description: "Dimension Produkte - eine Zeile pro Produkt, inkl. Produktgruppe aus dem Seed category_groups."
     columns:
-      - name: product_id
-        data_tests:
-          - unique
-          - not_null
+      - <<: *id_column
+        name: product_id
+        description: "Primärschlüssel des Produkts (id aus raw.products)."
       - name: category_group
+        description: "Produktgruppe aus dem Seed category_groups; Sonstiges, wenn keine Zuordnung existiert."
         data_tests:
           - not_null
 
   - name: fct_order_items
-    description: "Fakt Bestellpositionen - eine Zeile pro Bestellposition"
+    description: >
+      Fakt Bestellpositionen - eine Zeile pro Bestellposition.
+      Preise in US-Dollar, auf zwei Nachkommastellen gerundet.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "item_margin <= sale_price"
     columns:
       - name: order_item_id
+        description: "Primärschlüssel der Bestellposition."
         data_tests:
           - unique
           - not_null
@@ -33,26 +51,79 @@ models:
               arguments:
                 to: ref('dim_users')
                 field: user_id
+          - dbt_utils.not_null_proportion:
+              arguments:
+                at_least: 0.95
       - name: product_id
         data_tests:
           - relationships:
               arguments:
                 to: ref('dim_products')
                 field: product_id
+      - name: order_product_key
+        description: "Hash aus order_id und product_id. Nicht eindeutig: Ein Produkt kann mehrfach in einer Bestellung vorkommen."
+      - name: item_status
+        description: '{{ doc("order_status") }}'
+      - name: sale_price
+        description: "Verkaufspreis der Position in US-Dollar."
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+          - is_within_range:
+              arguments:
+                min_value: 0
+                max_value: 1000
+      - name: item_margin
+        description: "Marge in US-Dollar: Verkaufspreis minus Produktkosten."
 
   - name: fct_orders
-    description: "Fakt Bestellungen - eine Zeile pro Bestellung, Kennzahlen aus den Positionen"
+    description: "Fakt Bestellungen - eine Zeile pro Bestellung, Kennzahlen aus den Positionen."
+    config:
+      contract:
+        enforced: true
     columns:
       - name: order_id
+        description: "Primärschlüssel der Bestellung."
+        data_type: integer
+        constraints:
+          - type: not_null
+          - type: primary_key
         data_tests:
           - unique
           - not_null
       - name: user_id
+        description: "Kund:in, die bestellt hat."
+        data_type: integer
         data_tests:
           - relationships:
               arguments:
                 to: ref('dim_users')
                 field: user_id
+      - name: status
+        description: '{{ doc("order_status") }}'
+        data_type: text
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Complete', 'Processing', 'Shipped', 'Cancelled', 'Returned']
+      - name: status_group
+        description: "Statusgruppe: abgeschlossen, in Bearbeitung oder storniert."
+        data_type: text
+      - name: ordered_at
+        description: "Zeitpunkt der Bestellung."
+        data_type: timestamp with time zone
+      - name: line_count
+        description: "Anzahl der Positionen der Bestellung."
+        data_type: bigint
+      - name: revenue
+        description: >
+          Summe der Verkaufspreise aller Positionen der Bestellung in US-Dollar
+          (inklusive stornierter Positionen), auf zwei Nachkommastellen gerundet.
+        data_type: numeric(14,2)
+      - name: margin
+        description: "Summe der Positionsmargen in US-Dollar."
+        data_type: numeric(14,2)
 
   - name: obt_order_items
     description: "One Big Table - Bestellpositionen mit Nutzer- und Produktattributen (Serving Layer)"

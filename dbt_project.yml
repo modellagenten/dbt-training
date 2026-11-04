@@ -23,5 +23,8 @@ models:
     marts:
       +materialized: table
       +schema: marts
+      +persist_docs:
+        relation: true
+        columns: true
       fct_events:
         +full_refresh: false     # Schutz vor versehentlichem Neuaufbau (auch mit --full-refresh)
