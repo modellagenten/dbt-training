@@ -1,0 +1,9 @@
+# Einheitliche Zeilenenden, damit Skripte im Linux-Container auch von Windows aus funktionieren
+* text=auto eol=lf
+*.sh text eol=lf
+*.sql text eol=lf
+*.py text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.ps1 text eol=crlf
+*.gz binary

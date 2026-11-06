@@ -1,0 +1,6 @@
+dbt-core>=1.12,<1.13
+dbt-postgres>=1.10,<2
+# Semantic Layer (Block 10, Demo und optionale Übung): Befehl `mf`
+dbt-metricflow[dbt-postgres]>=0.11
+# Automatische Migration von YAML-Deprecations (Block 08, Upgrades): Befehl `dbt-autofix`
+dbt-autofix

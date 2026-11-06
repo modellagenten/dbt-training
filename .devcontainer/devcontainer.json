@@ -1,0 +1,22 @@
+{
+  "name": "dbt-Schulung",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "dbt",
+  "runServices": ["postgres", "dbt"],
+  "workspaceFolder": "/workspace/dbt_ecommerce",
+  "shutdownAction": "none",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "innoverio.vscode-dbt-power-user",
+        "redhat.vscode-yaml",
+        "samuelcolvin.jinjahtml",
+        "ms-python.python"
+      ],
+      "settings": {
+        "files.associations": { "*.sql": "jinja-sql", "*.yml": "jinja-yaml" },
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}

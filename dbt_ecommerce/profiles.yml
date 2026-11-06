@@ -1,0 +1,52 @@
+dbt_ecommerce:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'postgres') }}"
+      port: 5432
+      user: "{{ env_var('POSTGRES_USER') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD') }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'ecommerce') }}"
+      schema: dbt_dev
+      threads: 4
+
+    ci:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'postgres') }}"
+      port: 5432
+      user: "{{ env_var('POSTGRES_USER') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD') }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'ecommerce') }}"
+      schema: "{{ env_var('CI_SCHEMA', 'dbt_ci') }}"
+      threads: 4
+
+    prod:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'postgres') }}"
+      port: 5432
+      user: "{{ env_var('POSTGRES_USER') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD') }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'ecommerce') }}"
+      schema: analytics
+      threads: 4
+
+# Beispiele für andere Datenbanken (auskommentiert) - siehe Block 09
+#    snowflake:
+#      type: snowflake
+#      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+#      user: "{{ env_var('SNOWFLAKE_USER') }}"
+#      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+#      role: TRANSFORMER
+#      database: ECOMMERCE
+#      warehouse: TRANSFORM_WH
+#      schema: dbt_dev
+#      threads: 8
+#
+#    bigquery:
+#      type: bigquery
+#      method: service-account
+#      project: "{{ env_var('GCP_PROJECT') }}"
+#      dataset: dbt_dev
+#      keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS') }}"
+#      threads: 8

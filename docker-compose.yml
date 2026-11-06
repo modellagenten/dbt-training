@@ -1,0 +1,43 @@
+name: dbt-schulung
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: dbt-schulung-postgres
+    env_file: .env
+    environment:
+      TIME_SHIFT: ${TIME_SHIFT:-true}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./data:/data:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  dbt:
+    build: ./dbt
+    image: dbt-schulung-dbt:1.12
+    container_name: dbt-schulung-dbt
+    env_file: .env
+    environment:
+      POSTGRES_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      # ganzes Repository: Git findet so das Repository (.git) auch aus dem Projektordner heraus
+      - .:/workspace
+      # optional: Musterlösung (Git-Repository), falls sie bereitgestellt wird
+      - ./.solution:/solution:ro
+    working_dir: /workspace/dbt_ecommerce
+    ports:
+      - "8080:8080"   # dbt docs serve
+    command: sleep infinity
+
+volumes:
+  pgdata:
