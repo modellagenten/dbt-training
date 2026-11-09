@@ -4,7 +4,3 @@
 # Betriebssystem / Editor
 .DS_Store
 Thumbs.db
-
-# optionale Musterlösung (wird nicht eingecheckt)
-.solution/*
-!.solution/.gitkeep

@@ -1,45 +1,56 @@
 #!/bin/bash
-# Holt den Stand einer Übungslösung aus der Musterlösung (Ordner /solution).
+# Holt einen freigegebenen Lösungsstand (Git-Tag loesung-NN) aus dem Schulungs-Repository.
 #
 # Aufruf im Projektordner:   bash scripts/restore.sh 03
 #
-# Kopiert models/, seeds/, macros/, tests/, snapshots/, analyses/, functions/, selectors.yml,
-# vars.yml, packages.yml, dbt_project.yml, profiles.yml und .gitignore aus dem Git-Tag loesung-03
-# in euer Projekt. Danach "dbt deps" ausführen.
-# Eure eigenen Dateien in diesen Ordnern werden dabei ÜBERSCHRIEBEN - committet vorher!
+# Ersetzt models/, seeds/, macros/, tests/, snapshots/, analyses/, functions/ sowie
+# selectors.yml, vars.yml, packages.yml, dbt_project.yml, profiles.yml und .gitignore
+# durch den Stand der Musterlösung. Dateien in diesen Ordnern, die es in der Lösung nicht
+# gibt, werden entfernt. Eigene Änderungen vorher committen! Danach "dbt deps" ausführen.
 #
-# Voraussetzung: Die Musterlösung (ein Git-Repository mit den Tags loesung-01 bis loesung-10)
-# liegt im Ordner .solution des Repositories.
+# Die Tags loesung-01, loesung-02, ... werden im Laufe der Schulung freigegeben.
 set -euo pipefail
 
 NR="${1:-}"
-SOLUTION="${SOLUTION_DIR:-/solution}"
+REMOTE="${SOLUTION_REMOTE:-https://github.com/modellagenten/dbt-training.git}"
+PATHS=(models seeds macros tests snapshots analyses functions
+       selectors.yml vars.yml packages.yml dbt_project.yml profiles.yml .gitignore)
 
-if ! git -C "$SOLUTION" rev-parse --git-dir >/dev/null 2>&1; then
-    echo "Keine Musterlösung gefunden (erwartet im Ordner .solution des Repositories)."
+if [ ! -f dbt_project.yml ]; then
+    echo "Bitte im Projektordner aufrufen (dort, wo dbt_project.yml liegt)."
     exit 1
 fi
+
 if [ -z "$NR" ]; then
     echo "Aufruf: bash scripts/restore.sh <Nummer>   z. B. 03"
-    echo "Verfügbare Stände:"; git -C "$SOLUTION" tag --list 'loesung-*' | sed 's/^/  /'
+    echo "Bisher freigegebene Stände:"
+    git ls-remote --tags --refs "$REMOTE" 'loesung-*' | sed 's#.*refs/tags/#  #' | sort
     exit 1
 fi
 TAG="loesung-$NR"
-git -C "$SOLUTION" rev-parse -q --verify "refs/tags/$TAG" >/dev/null || { echo "Tag $TAG nicht gefunden."; exit 1; }
 
-if [ -n "$(git status --porcelain -- . 2>/dev/null)" ]; then
+if [ -n "$(git status --porcelain -- .)" ]; then
     echo "Achtung: Es gibt uncommittete Änderungen. Bitte erst committen (git add -A && git commit -m ...)."
     exit 1
 fi
 
-TMP="$(mktemp -d)"
-git -C "$SOLUTION" archive "$TAG" | tar -x -C "$TMP"
-for d in models seeds macros tests snapshots analyses functions; do
-    if [ -d "$TMP/$d" ]; then rm -r "./$d" 2>/dev/null || true; cp -R "$TMP/$d" "./$d"; fi
+if ! git fetch -q --no-tags "$REMOTE" "+refs/tags/$TAG:refs/tags/$TAG" 2>/dev/null; then
+    echo "Stand $TAG ist (noch) nicht freigegeben oder das Repository ist nicht erreichbar."
+    exit 1
+fi
+
+# nur Pfade übernehmen, die es im Lösungsstand gibt
+EXIST=()
+for p in "${PATHS[@]}"; do
+    if git cat-file -e "$TAG:./$p" 2>/dev/null; then EXIST+=("$p"); fi
 done
-for f in selectors.yml vars.yml packages.yml dbt_project.yml profiles.yml .gitignore; do
-    [ -f "$TMP/$f" ] && cp "$TMP/$f" "./$f"
-done
-# Hinweis: package-lock.yml wird nicht kopiert - "dbt deps" erzeugt sie neu.
-rm -r "$TMP"
-echo "Stand $TAG wiederhergestellt. Prüfen mit: git status   und   dbt build"
+if [ ${#EXIST[@]} -eq 0 ]; then
+    echo "Im Tag $TAG wurde kein dbt-Projekt in diesem Ordner gefunden."
+    exit 1
+fi
+
+# git restore übernimmt den Stand des Tags; Dateien, die dort fehlen, werden entfernt
+git restore --source="$TAG" --worktree -- "${EXIST[@]}"
+# package-lock.yml wird nicht übernommen - "dbt deps" erzeugt sie neu.
+
+echo "Stand $TAG wiederhergestellt. Prüfen mit: git status   und danach   dbt deps && dbt build"

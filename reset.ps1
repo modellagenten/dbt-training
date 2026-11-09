@@ -2,7 +2,7 @@
 # Die Datenbank wird gelöscht und aus den CSV-Dateien neu aufgebaut (ca. 30 Sekunden).
 # Das Projekt dbt_ecommerce/ bleibt unverändert.
 #
-# Aufruf im Ordner dbt-training-environment:   .\reset.ps1
+# Aufruf im Ordner dbt-training:   .\reset.ps1
 # Falls Skripte gesperrt sind:        powershell -ExecutionPolicy Bypass -File .\reset.ps1
 Set-Location -Path $PSScriptRoot
 docker compose down -v

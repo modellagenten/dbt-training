@@ -1,4 +1,4 @@
-# dbt-training-environment
+# dbt-training
 
 Schulungsumgebung für die Schulung **dbt Core Grundlagen**. Sie startet mit einem Befehl und enthält:
 
@@ -20,8 +20,8 @@ Alles läuft lokal auf eurem Rechner. Ihr braucht keinen Cloud-Account und keine
 ## Schnellstart
 
 ```text
-git clone https://github.com/modellagenten/dbt-training-environment.git
-cd dbt-training-environment
+git clone https://github.com/modellagenten/dbt-training.git
+cd dbt-training
 ```
 
 | Schritt | Linux / macOS | Windows (PowerShell) |
@@ -33,7 +33,7 @@ docker compose up -d --build   # erster Start dauert einige Minuten (Image bauen
 docker compose ps              # beide Services müssen "running" bzw. "healthy" sein
 ```
 
-Danach in VS Code den Ordner `dbt-training-environment` öffnen und **"Reopen in Container"** wählen.
+Danach in VS Code den Ordner `dbt-training` öffnen und **"Reopen in Container"** wählen.
 Im Terminal von VS Code läuft ihr jetzt im dbt-Container im Projektordner `dbt_ecommerce`:
 
 ```bash
@@ -61,7 +61,7 @@ Die Rohdaten liegen im Schema `raw`. Alles, was dbt baut, erscheint in Schemas w
 ## Hinweise für Windows
 
 - Docker Desktop mit **WSL 2** verwenden (Einstellung *Use the WSL 2 based engine*).
-- Den Ordner `dbt-training-environment` nicht in OneDrive oder einem anderen synchronisierten Ordner ablegen; das stört die Container-Mounts.
+- Den Ordner `dbt-training` nicht in OneDrive oder einem anderen synchronisierten Ordner ablegen; das stört die Container-Mounts.
 - Alle dbt-, Git- und Python-Befehle der Übungen gebt ihr im Terminal des Dev Containers (Linux, bash) ein, dort ist alles identisch zu macOS und Linux. Auf dem Host nutzt ihr nur `docker compose`.
 - Die Dateien sind für einheitliche Zeilenenden (LF) vorbereitet (`.gitattributes`). Wenn ihr Dateien mit einem Editor bearbeitet, speichert sie mit LF-Zeilenenden (VS Code zeigt das rechts unten an).
 
@@ -92,6 +92,19 @@ python scripts/simulate.py --step delete-orders   # Bestellungen löschen (Hard 
 python scripts/simulate.py --step stale --days 5  # alle Zeitstempel in die Vergangenheit schieben
 python scripts/simulate.py --step status          # Überblick über den aktuellen Stand
 ```
+
+## Lösungsstand übernehmen (wenn ihr bei einer Übung nicht weiterkommt)
+
+Nach jeder Übung wird die Musterlösung als Git-Tag (`loesung-01`, `loesung-02`, ...) freigegeben. Mit dem Skript `dbt_ecommerce/scripts/restore.sh` holt ihr einen solchen Stand in euer Projekt. Aufruf im Container im Projektordner:
+
+```bash
+git add -A && git commit -m "mein Stand"   # eigene Arbeit vorher sichern
+bash scripts/restore.sh                     # zeigt die bisher freigegebenen Stände
+bash scripts/restore.sh 03                  # übernimmt den Stand loesung-03
+dbt deps && dbt build
+```
+
+Das Skript ersetzt `models/`, `seeds/`, `macros/`, `tests/`, `snapshots/`, `analyses/`, `functions/` und die Projektdateien (`dbt_project.yml`, `packages.yml`, ...) durch den Lösungsstand. Dateien in diesen Ordnern, die es in der Lösung nicht gibt, werden entfernt. Mit `git diff` seht ihr den Unterschied zu eurem Stand; mit `git restore .` macht ihr die Übernahme wieder rückgängig.
 
 ## Hilfe, wenn etwas hängt
 

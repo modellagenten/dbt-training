@@ -32,8 +32,6 @@ services:
     volumes:
       # ganzes Repository: Git findet so das Repository (.git) auch aus dem Projektordner heraus
       - .:/workspace
-      # optional: Musterlösung (Git-Repository), falls sie bereitgestellt wird
-      - ./.solution:/solution:ro
     working_dir: /workspace/dbt_ecommerce
     ports:
       - "8080:8080"   # dbt docs serve
