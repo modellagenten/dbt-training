@@ -4,17 +4,17 @@
 # Aufruf im Projektordner:   bash scripts/restore.sh 03
 #
 # Ersetzt models/, seeds/, macros/, tests/, snapshots/, analyses/, functions/ sowie
-# selectors.yml, vars.yml, packages.yml, dbt_project.yml, profiles.yml und .gitignore
-# durch den Stand der Musterlösung. Dateien in diesen Ordnern, die es in der Lösung nicht
-# gibt, werden entfernt. Eigene Änderungen vorher committen! Danach "dbt deps" ausführen.
+# selectors.yml, vars.yml, packages.yml, dbt_project.yml und profiles.yml durch den Stand
+# der Musterlösung. Dateien in diesen Ordnern, die es in der Lösung nicht gibt, werden
+# entfernt. Eigene Änderungen vorher committen! Danach "dbt deps" ausführen.
 #
 # Die Tags loesung-01, loesung-02, ... werden im Laufe der Schulung freigegeben.
 set -euo pipefail
 
 NR="${1:-}"
 REMOTE="${SOLUTION_REMOTE:-https://github.com/modellagenten/dbt-training.git}"
-PATHS=(models seeds macros tests snapshots analyses functions
-       selectors.yml vars.yml packages.yml dbt_project.yml profiles.yml .gitignore)
+DIRS=(models seeds macros tests snapshots analyses functions)
+FILES=(selectors.yml vars.yml packages.yml dbt_project.yml profiles.yml)
 
 if [ ! -f dbt_project.yml ]; then
     echo "Bitte im Projektordner aufrufen (dort, wo dbt_project.yml liegt)."
@@ -34,23 +34,33 @@ if [ -n "$(git status --porcelain -- .)" ]; then
     exit 1
 fi
 
-if ! git fetch -q --no-tags "$REMOTE" "+refs/tags/$TAG:refs/tags/$TAG" 2>/dev/null; then
+# Tag in ein temporäres Repository holen - euer eigenes Repository bleibt unverändert
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+git init -q --bare "$TMP/repo"
+if ! git -C "$TMP/repo" fetch -q --depth 1 --no-tags "$REMOTE" "+refs/tags/$TAG:refs/tags/$TAG" 2>/dev/null; then
     echo "Stand $TAG ist (noch) nicht freigegeben oder das Repository ist nicht erreichbar."
     exit 1
 fi
+mkdir "$TMP/files"
+git -C "$TMP/repo" archive "$TAG" | tar -x -C "$TMP/files"
 
-# nur Pfade übernehmen, die es im Lösungsstand gibt
-EXIST=()
-for p in "${PATHS[@]}"; do
-    if git cat-file -e "$TAG:./$p" 2>/dev/null; then EXIST+=("$p"); fi
-done
-if [ ${#EXIST[@]} -eq 0 ]; then
-    echo "Im Tag $TAG wurde kein dbt-Projekt in diesem Ordner gefunden."
+# Das dbt-Projekt liegt im Tag entweder im Wurzelordner oder im Ordner dbt_ecommerce/
+if [ -f "$TMP/files/dbt_project.yml" ]; then
+    SRC="$TMP/files"
+elif [ -f "$TMP/files/dbt_ecommerce/dbt_project.yml" ]; then
+    SRC="$TMP/files/dbt_ecommerce"
+else
+    echo "Im Tag $TAG wurde kein dbt-Projekt gefunden."
     exit 1
 fi
 
-# git restore übernimmt den Stand des Tags; Dateien, die dort fehlen, werden entfernt
-git restore --source="$TAG" --worktree -- "${EXIST[@]}"
+for d in "${DIRS[@]}"; do
+    if [ -d "$SRC/$d" ]; then rm -rf "./$d"; cp -R "$SRC/$d" "./$d"; fi
+done
+for f in "${FILES[@]}"; do
+    if [ -f "$SRC/$f" ]; then cp "$SRC/$f" "./$f"; fi
+done
 # package-lock.yml wird nicht übernommen - "dbt deps" erzeugt sie neu.
 
 echo "Stand $TAG wiederhergestellt. Prüfen mit: git status   und danach   dbt deps && dbt build"
