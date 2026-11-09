@@ -104,7 +104,7 @@ bash scripts/restore.sh 03                  # übernimmt den Stand loesung-03
 dbt deps && dbt build
 ```
 
-Das Skript ersetzt `models/`, `seeds/`, `macros/`, `tests/`, `snapshots/`, `analyses/`, `functions/` und die Projektdateien (`dbt_project.yml`, `packages.yml`, ...) durch den Lösungsstand. Dateien in diesen Ordnern, die es in der Lösung nicht gibt, werden entfernt. Mit `git diff` seht ihr den Unterschied zu eurem Stand; mit `git restore .` macht ihr die Übernahme wieder rückgängig.
+Das Skript ersetzt `models/`, `seeds/`, `macros/`, `tests/`, `snapshots/`, `analyses/`, `functions/` und die Projektdateien (`dbt_project.yml`, `packages.yml`, ...) durch den Lösungsstand. Dateien in diesen Ordnern, die es in der Lösung nicht gibt, werden entfernt. Mit `git status` und `git diff` seht ihr den Unterschied zu eurem Stand; mit `git restore . && git clean -fd .` macht ihr die Übernahme wieder rückgängig (zurück zu eurem letzten Commit).
 
 ## Hilfe, wenn etwas hängt
 
